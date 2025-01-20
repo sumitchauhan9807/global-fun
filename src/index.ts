@@ -83,7 +83,8 @@ const Main = async () => {
   await server.start();
   initMediaSoup()
   app.get("/",(req,res,next)=>{
-    res.sendFile(path.join(__dirname,"../", 'front-end/index.html'));
+    res.send("hello from global fun")
+    // res.sendFile(path.join(__dirname,"../", 'front-end/index.html'));
   })
   app.use(
     '/graphql',
