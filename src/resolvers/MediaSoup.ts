@@ -157,7 +157,7 @@ export class MediaSoup {
           })
           consumerTransport.consumer.on('transportclose',()=>{
               console.log("Consumer transport closed. Just fyi")
-              consumerTransport?.consumer.close()
+              // consumerTransport?.consumer.close()
           })
           const consumerParams = {
               producerId: producer.id,
