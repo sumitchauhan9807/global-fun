@@ -46,7 +46,6 @@ export class MediaSoup {
     @Arg("transportId") transportId : string
   ) {
     try {
-      console.log(allProducerTransports,"alllprod")
       // return true
       let transport = allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
       if(!transport) throw Error('Transport not found')
@@ -99,6 +98,7 @@ export class MediaSoup {
   async createConsumerTransport(
     @Arg("clientId") clientId : string
   ) {
+    console.log("createConsumerTransport")
     try {
       let findTransports = allConsumerTransports.filter((t:any)=> t.clientId == clientId)
       if(findTransports.length) {
@@ -131,6 +131,8 @@ export class MediaSoup {
 
   ) {
     try {
+    console.log("consumeMedia")
+
       rtpCapabilities = JSON.parse(rtpCapabilities)
       let producerTransport = getProducerTransport(modelId)
       if(!producerTransport) throw Error('Producer Transport Not Found')
@@ -163,7 +165,6 @@ export class MediaSoup {
               kind:consumerTransport.consumer.kind,
               rtpParameters: JSON.stringify(consumerTransport.consumer.rtpParameters),
           }
-          console.log(consumerParams)
           return consumerParams
       }
     } catch (e)  {
@@ -176,6 +177,7 @@ export class MediaSoup {
     @Arg("clientId") clientId : string,
     @Arg("dtlsParameters") dtlsParameters : string
   ) {
+    console.log("connectConsumerTransport")
     try {
       let consumerTransport = getConsumerTransport(clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
@@ -194,6 +196,7 @@ export class MediaSoup {
     @Arg("clientId") clientId : string,
   ) {
     try {
+      console.log("unpauseConsumer")
       let consumerTransport = getConsumerTransport(clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
       await consumerTransport.consumer.resume()
