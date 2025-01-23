@@ -4,7 +4,7 @@ import { ProducerTransport, ConsumerTransport } from "../types/DataTypes";
 const os = require("os"); //operating system module. part of node
 const mediasoup = require("mediasoup");
 const totalThreads = os.cpus().length; //maximum number of allowed workers
-
+import {LISTEN_INFOS} from '../constants'
 // export let workers: any = [];
 // // init router, it's where our 1 router will live
 // export let router: any = null;
@@ -178,20 +178,7 @@ export class MediaSoup {
         enableUdp: true,
         enableTcp: true, //always use UDP unless we can't
         preferUdp: true,
-        listenInfos: [
-          {
-            protocol: "udp",
-            ip: "127.0.0.1",
-            // ip: '0.0.0.0',
-            // announcedIp: '127.0.0.1',
-          },
-          {
-            protocol: "tcp",
-            ip: "127.0.0.1",
-            // ip: '0.0.0.0',
-            // announcedIp: '127.0.0.1',
-          },
-        ],
+        listenInfos: LISTEN_INFOS,
       });
       // console.log(transport)
       const clientTransportParams = {
