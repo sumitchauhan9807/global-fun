@@ -157,9 +157,9 @@ export class MediaSoup {
   }
 
   async getRouter() {
-    if(this.router){ 
-      return this.router
-    }
+    // if(this.router){ 
+    //   return this.router
+    // }
     let worker:any = await this.getWorker()
     let router = await worker.createRouter({
       mediaCodecs: config.routerMediaCodecs,
@@ -217,8 +217,8 @@ export class MediaSoup {
       }
       // console.log(leastLoadedWorker,leastWorkerLoad)
       // console.log(this.workers,"workersworkersworkersworkers")
-      resolve(this.workers[0]);
-      // resolve(this.workers[0])
+      // resolve(this.workers[0]);
+      resolve(this.workers[leastLoadedWorker])
     });
   }
 }
