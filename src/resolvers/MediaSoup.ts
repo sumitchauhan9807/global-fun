@@ -1,12 +1,14 @@
 import { Resolver, Query, Mutation, Arg } from "type-graphql";
-import { router, addProducerTransport ,removeProducerTransports ,allProducerTransports ,addProducer ,allConsumerTransports ,addConsumerTransport ,removeConsumerTransports ,getProducerTransport ,getConsumerTransport } from "../mediasoup";
+
 import { RtpCapabilities, CreateProducerTransport ,ConsumeMediaReturnType } from "../types/ReturnTypes";
 import createWebRtcTransport from "../mediasoup/createWebRtcTransport";
 
+import {mediaSoup} from '../index'
 @Resolver()
 export class MediaSoup {
   @Mutation(() => String)
   async getRtpCapabilities() {
+    let router = await mediaSoup.getRouter()
     // console.log(router?.rtpCapabilities);
     return JSON.stringify(router?.rtpCapabilities) ;
   }
@@ -16,16 +18,17 @@ export class MediaSoup {
     @Arg("modelId") modelId : string
   ) {
     try {
-      let findTransports = allProducerTransports.filter((t:any)=> t.modelId == modelId)
-      if(findTransports.length) {
-        findTransports.forEach((tr:any) => {
-          tr.transport.close()
-        });
-        removeProducerTransports(modelId)
-      }
-      const { transport, clientTransportParams } = await createWebRtcTransport(router);
-      
-      addProducerTransport(modelId,transport);
+      // let findTransports = mediaSoup.allProducerTransports.filter((t:any)=> t.modelId == modelId)
+      // if(findTransports.length) {
+      //   findTransports.forEach((tr:any) => {
+      //     tr.transport.close()
+      //   });
+      //   mediaSoup.removeProducerTransports(modelId)
+      // }
+      mediaSoup.removeRoom(modelId)
+      const {  router, transport, clientTransportParams } = await mediaSoup.createWebRtcTransport();
+      mediaSoup.addRoom(modelId,transport,router)
+      // mediaSoup.addProducerTransport(modelId,transport);
       // console.log(clientTransportParams)
       // console.log(transport.internal)
 
@@ -47,7 +50,8 @@ export class MediaSoup {
   ) {
     try {
       // return true
-      let transport = allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
+      // let transport = mediaSoup.allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
+      let transport = mediaSoup.rooms.find((r:any) => r.transport.internal.transportId == transportId )
       if(!transport) throw Error('Transport not found')
       dtlsParameters = JSON.parse(dtlsParameters)
       // console.log(dtlsParameters,"dtlsParameters")
@@ -70,14 +74,15 @@ export class MediaSoup {
     @Arg("transportId") transportId : string
   ) {
     try {
-      let transport = allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
+      // let transport = mediaSoup.allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
+      let transport = mediaSoup.rooms.find((r:any) => r.transport.internal.transportId == transportId )
       if(!transport) throw Error('Transport not found')
       rtpParameters = JSON.parse(rtpParameters)
       let producer = await transport.transport.produce({kind, rtpParameters})
       producer.on("close", ()=>{
         console.log("PRODUCER CLODES")
       })
-      addProducer(transportId,producer)
+      mediaSoup.addProducer(transportId,producer)
     //   producer.on('transportclose',()=>{
     //     console.log("Producer transport closed. Just fyi")
     //     producer.close()
@@ -96,20 +101,21 @@ export class MediaSoup {
 
   @Mutation(() => CreateProducerTransport)
   async createConsumerTransport(
-    @Arg("clientId") clientId : string
+    @Arg("clientId") clientId : string,
+    @Arg("modelId") modelId : string
   ) {
     console.log("createConsumerTransport")
     try {
-      let findTransports = allConsumerTransports.filter((t:any)=> t.clientId == clientId)
-      if(findTransports.length) {
-        findTransports.forEach((tr:any) => {
-          tr.transport.close()
-        });
-        removeConsumerTransports(clientId)
+      let modelRoom = mediaSoup.rooms.find((r:any) => r.modelId == modelId )
+      if(!modelRoom) throw Error("Room Not Found")
+      let findTransport = modelRoom.consumers.find((c:any) => c.clientId == clientId)
+      // let findTransports = mediaSoup.allConsumerTransports.filter((t:any)=> t.clientId == clientId)
+      if(findTransport) {
+        mediaSoup.removeConsumerTransport(modelId,clientId)
       }
-      const { transport, clientTransportParams } = await createWebRtcTransport(router);
+      const {  transport, clientTransportParams } = await mediaSoup.createWebRtcTransport(modelRoom.router);
       
-      addConsumerTransport(clientId,transport);
+      mediaSoup.addConsumerTransport(clientId,modelId,transport);
       
 
       return {
@@ -119,6 +125,7 @@ export class MediaSoup {
         dtlsParameters : JSON.stringify(clientTransportParams.dtlsParameters),
       };
     } catch (e)  {
+      console.log(e)
       throw new Error(e)
     }
   }
@@ -134,18 +141,20 @@ export class MediaSoup {
     console.log("consumeMedia")
 
       rtpCapabilities = JSON.parse(rtpCapabilities)
-      let producerTransport = getProducerTransport(modelId)
-      if(!producerTransport) throw Error('Producer Transport Not Found')
+      let producerRoom = mediaSoup.getProducerTransport(modelId)
+      if(!producerRoom) throw Error('Producer Transport Not Found')
 
-      let consumerTransport = getConsumerTransport(clientId)
+      let consumerTransport = producerRoom.consumers.find((c:any) => c.clientId == clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
 
 
-      let producer = producerTransport.producer
+      let producer = producerRoom.producer
 
       if(!producer){
         throw Error('Producer Not Found')
-      }else if(!router.canConsume({producerId:producer.id,rtpCapabilities})){
+      // }else if(!router.canConsume({producerId:producer.id,rtpCapabilities})){
+      }else if(false){
+
         throw Error('Cannot Consume')
       }else{
           // we can consume... there is a producer and client is able.
@@ -168,18 +177,23 @@ export class MediaSoup {
           return consumerParams
       }
     } catch (e)  {
+      console.log(e)
       throw new Error(e)
     }
   }
 
   @Mutation(() => Boolean)
   async connectConsumerTransport(
+    @Arg("modelId") modelId : string,
     @Arg("clientId") clientId : string,
     @Arg("dtlsParameters") dtlsParameters : string
   ) {
     console.log("connectConsumerTransport")
     try {
-      let consumerTransport = getConsumerTransport(clientId)
+      let producerRoom = mediaSoup.getProducerTransport(modelId)
+      if(!producerRoom) throw Error('Producer Transport Not Found')
+
+      let consumerTransport = producerRoom.consumers.find((c:any) => c.clientId == clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
       console.log(dtlsParameters)
       dtlsParameters = JSON.parse(dtlsParameters)
@@ -193,12 +207,19 @@ export class MediaSoup {
 
   @Mutation(() => Boolean)
   async unpauseConsumer(
+    @Arg("modelId") modelId : string,
     @Arg("clientId") clientId : string,
   ) {
     try {
       console.log("unpauseConsumer")
-      let consumerTransport = getConsumerTransport(clientId)
+      let producerRoom = mediaSoup.getProducerTransport(modelId)
+      console.log(producerRoom)
+
+      if(!producerRoom) throw Error('Producer Transport Not Found')
+
+      let consumerTransport = producerRoom.consumers.find((c:any) => c.clientId == clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
+      
       await consumerTransport.consumer.resume()
       return true
     } catch (e)  {
@@ -209,23 +230,23 @@ export class MediaSoup {
 
   
 
-  @Query(() => String)
-  async sanityCHck() {
-    console.log(allProducerTransports.length);
-    allProducerTransports.map((thisTransport:any)=>{
-      console.log(thisTransport.transport.dtlsState)
-    })
-    return allProducerTransports.length.toString()
-  }
+  // @Query(() => String)
+  // async sanityCHck() {
+  //   console.log(allProducerTransports.length);
+  //   allProducerTransports.map((thisTransport:any)=>{
+  //     console.log(thisTransport.transport.dtlsState)
+  //   })
+  //   return allProducerTransports.length.toString()
+  // }
 
-  @Query(() => String)
-  async sanityCHck2() {
-    console.log(allConsumerTransports.length);
-    allConsumerTransports.map((thisTransport:any)=>{
-      console.log(thisTransport.transport.dtlsState)
-    })
-    return allConsumerTransports.length.toString()
-  }
+  // @Query(() => String)
+  // async sanityCHck2() {
+  //   console.log(allConsumerTransports.length);
+  //   allConsumerTransports.map((thisTransport:any)=>{
+  //     console.log(thisTransport.transport.dtlsState)
+  //   })
+  //   return allConsumerTransports.length.toString()
+  // }
 }
 
 

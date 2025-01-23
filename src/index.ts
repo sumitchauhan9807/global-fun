@@ -8,13 +8,13 @@ import http from 'http';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
 import {UserResolver} from './resolvers/User'
-import {MediaSoup} from './resolvers/MediaSoup'
+import {MediaSoup as MediaSoupResolver} from './resolvers/MediaSoup'
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import PubNub from './services/PubNub'
 import {User} from './entities/User'
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
-import initMediaSoup from './mediasoup/index'
+import { MediaSoup } from './mediasoup/index'
 
 console.log({
   name: "default",
@@ -55,7 +55,7 @@ const Main = async () => {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver,MediaSoup]
+      resolvers:[UserResolver,MediaSoupResolver]
   });
   const app = express();
   app.use(
@@ -81,7 +81,9 @@ const Main = async () => {
   //   },
   // });
   await server.start();
-  initMediaSoup()
+  
+  
+  // initMediaSoup()
   app.get("/",(req,res,next)=>{
     res.send("hello from global fun")
     // res.sendFile(path.join(__dirname,"../", 'front-end/index.html'));
@@ -100,7 +102,10 @@ const Main = async () => {
 };
 
 
-
-Main()
+export let mediaSoup = new MediaSoup()
+mediaSoup.initMediaSoup().then(()=>{
+  console.log("Mediasoup class initted successfuly")
+  Main()
+})
 
 
