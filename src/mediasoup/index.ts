@@ -34,14 +34,18 @@ export class MediaSoup {
       modelId:modelId,
       transport:transport,
       router:router,
+      producer:{
+        audio:null,
+        video:null
+      },
       consumers:[]
     })
   }
 
-  addProducer = (transportId: String, producer: any) => {
+  addProducer = (transportId: String, producer: any,kind:any) => {
     this.rooms = this.rooms.map((room: any) => {
       if (room.transport.internal.transportId == transportId) {
-        room.producer = producer;
+        room.producer[kind] = producer;
       }
       return room;
     });
@@ -108,27 +112,7 @@ export class MediaSoup {
   };
 
 
- /////////////////////////////////////////////////////////////
-   addProducerTransport = (modelId: String, transport: any) => {
-    this.allProducerTransports.push({
-      modelId: modelId,
-      transport: transport,
-    });
-  };
-  
-   
-  
-   
-  
-  removeProducerTransports = (modelId: String) => {
-    this.allProducerTransports = this.allProducerTransports.filter((transport: any) => {
-      if (transport.modelId != modelId) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  };
+ 
   
   
   
@@ -179,6 +163,8 @@ export class MediaSoup {
         enableTcp: true, //always use UDP unless we can't
         preferUdp: true,
         listenInfos: LISTEN_INFOS,
+        maxIncomingBitrate: 5000000, // 5 Mbps, default is INF
+        initialAvailableOutgoingBitrate: 5000000 // 5 Mbps, default is 600000
       });
       // console.log(transport)
       const clientTransportParams = {

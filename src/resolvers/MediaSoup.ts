@@ -74,6 +74,7 @@ export class MediaSoup {
     @Arg("transportId") transportId : string
   ) {
     try {
+      console.log("START PRODUCING", kind)
       // let transport = mediaSoup.allProducerTransports.find((t:any) => t.transport.internal.transportId == transportId)
       let transport = mediaSoup.rooms.find((r:any) => r.transport.internal.transportId == transportId )
       if(!transport) throw Error('Transport not found')
@@ -82,7 +83,7 @@ export class MediaSoup {
       producer.on("close", ()=>{
         console.log("PRODUCER CLODES")
       })
-      mediaSoup.addProducer(transportId,producer)
+      mediaSoup.addProducer(transportId,producer,kind)
     //   producer.on('transportclose',()=>{
     //     console.log("Producer transport closed. Just fyi")
     //     producer.close()
@@ -135,7 +136,7 @@ export class MediaSoup {
     @Arg("rtpCapabilities") rtpCapabilities : string,
     @Arg("modelId") modelId : string,
     @Arg("clientId") clientId : string,
-
+    @Arg("kind") kind : string
   ) {
     try {
     console.log("consumeMedia")
@@ -148,8 +149,10 @@ export class MediaSoup {
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
 
 
-      let producer = producerRoom.producer
+      let producer = producerRoom.producer[kind]
+      if(!producer) throw Error(`Producer of type ${kind} Not Found`)
 
+      console.log(producer)
       if(!producer){
         throw Error('Producer Not Found')
       // }else if(!router.canConsume({producerId:producer.id,rtpCapabilities})){
