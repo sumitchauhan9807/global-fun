@@ -147,7 +147,10 @@ export class MediaSoup {
 
       let consumerTransport = producerRoom.consumers.find((c:any) => c.clientId == clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
-
+      if(!consumerTransport.consumer) {
+        consumerTransport.consumer = {}
+      }
+      
 
       let producer = producerRoom.producer[kind]
       if(!producer) throw Error(`Producer of type ${kind} Not Found`)
@@ -162,20 +165,20 @@ export class MediaSoup {
       }else{
           // we can consume... there is a producer and client is able.
           // proceed!
-          consumerTransport.consumer = await consumerTransport.transport.consume({
+          consumerTransport.consumer[kind] = await consumerTransport.transport.consume({
               producerId: producer.id,
               rtpCapabilities,
               paused: true, //see docs, this is usually the best way to start
           })
-          consumerTransport.consumer.on('transportclose',()=>{
+          consumerTransport.consumer[kind].on('transportclose',()=>{
               console.log("Consumer transport closed. Just fyi")
               consumerTransport?.consumer.close()
           })
           const consumerParams = {
               producerId: producer.id,
-              id: consumerTransport.consumer.id,
-              kind:consumerTransport.consumer.kind,
-              rtpParameters: JSON.stringify(consumerTransport.consumer.rtpParameters),
+              id: consumerTransport.consumer[kind].id,
+              kind:consumerTransport.consumer[kind].kind,
+              rtpParameters: JSON.stringify(consumerTransport.consumer[kind].rtpParameters),
           }
           return consumerParams
       }
@@ -212,6 +215,7 @@ export class MediaSoup {
   async unpauseConsumer(
     @Arg("modelId") modelId : string,
     @Arg("clientId") clientId : string,
+    @Arg("kind") kind : string,
   ) {
     try {
       console.log("unpauseConsumer")
@@ -222,8 +226,8 @@ export class MediaSoup {
 
       let consumerTransport = producerRoom.consumers.find((c:any) => c.clientId == clientId)
       if(!consumerTransport) throw Error('Consumer Transport Not Found')
-      
-      await consumerTransport.consumer.resume()
+      console.log(consumerTransport,"consumerTransport")
+      await consumerTransport.consumer[kind].resume()
       return true
     } catch (e)  {
       console.log(e)
