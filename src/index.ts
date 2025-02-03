@@ -8,26 +8,14 @@ import http from 'http';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
 import {UserResolver} from './resolvers/User'
-import {MediaSoup as MediaSoupResolver} from './resolvers/MediaSoup'
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import PubNub from './services/PubNub'
 import {User} from './entities/User'
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
-import { MediaSoup } from './mediasoup/index'
 
-console.log({
-  name: "default",
-  type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_DATABASE,
-  synchronize: true,
-  logging: true,
-  entities: [User]
-})
+
+
 
 const Main = async () => {
 
@@ -55,7 +43,7 @@ const Main = async () => {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver,MediaSoupResolver]
+      resolvers:[UserResolver]
   });
   const app = express();
   app.use(
@@ -102,10 +90,7 @@ const Main = async () => {
 };
 
 
-export let mediaSoup = new MediaSoup()
-mediaSoup.initMediaSoup().then(()=>{
-  console.log("Mediasoup class initted successfuly")
-  Main()
-})
+
+Main()
 
 
