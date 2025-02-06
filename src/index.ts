@@ -8,10 +8,13 @@ import http from 'http';
 import cors from 'cors';
 import { expressMiddleware } from '@apollo/server/express4';
 import {UserResolver} from './resolvers/User'
+import {ModelResolver} from './resolvers/Model'
+
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import PubNub from './services/PubNub'
-import {User} from './entities/User'
+import {User,Model} from './entities/User'
+
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
 
 
@@ -36,14 +39,14 @@ const Main = async () => {
     database: DB_DATABASE,
     synchronize: true,
     logging: true,
-    entities: [User]
+    entities: [User,Model]
   })
   
   interface MyContext {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver]
+      resolvers:[UserResolver,ModelResolver]
   });
   const app = express();
   app.use(

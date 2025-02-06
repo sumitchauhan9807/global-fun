@@ -27,3 +27,30 @@ export class User extends BaseEntity {
   @Column()
   password: string;
 }
+
+@ObjectType()
+@Entity()
+export class Model extends BaseEntity {
+  @Field(() => ID)
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Field()
+  @Column({ unique: true })
+  username: string;
+
+  @Field()
+  @Column({ unique: true })
+  email: string;
+
+  @Field()
+  @Column()
+  name: string;
+
+  @Field()
+  @Column({nullable:true})
+  avatar: string;
+
+  @Column()
+  password: string;
+}
