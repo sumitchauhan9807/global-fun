@@ -78,7 +78,7 @@ const Main = async () => {
   })
   app.use(
     '/graphql',
-    cors<cors.CorsRequest>({ origin: ['https://sneaky-paradise.com'] }),
+    cors<cors.CorsRequest>({ origin: '*' }),
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => ({ token: req.headers.token }),
