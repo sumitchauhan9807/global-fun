@@ -10,6 +10,13 @@ import {JWT_KEY} from '../constants'
  
 @Resolver()
 export class ModelResolver {
+
+
+  @Query(() => [Model])
+  async getAllModels() {
+    let models =  await Model.find()
+    return models
+  }
   
   @Mutation(() => LoginUserResponse)
   async modelRegister(@Arg("data") input : RegisterInput): Promise<LoginUserResponse> {
