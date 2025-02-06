@@ -38,7 +38,7 @@ export class UserResolver {
         url:"https://www.google.com/recaptcha/api/siteverify",
         method:'POST',
         params:{
-          secret:"6LeX__cpAAAAAHRNiZ2eiC9g4nOV2goJOWZxmoaL", // it should be dynamic
+          secret:"6LdUh84qAAAAABO1iuHhm5IKD9C8SxZVES2GEQUx", // it should be dynamic
           response:input.captcha
         }
       })
