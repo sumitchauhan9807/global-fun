@@ -1,4 +1,5 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import { Resolver, Query, Mutation, Arg,UseMiddleware ,Ctx } from "type-graphql";
+import {isModelAuthed} from '../decorators/auth'
 import bcrypt from "bcryptjs";
 import axios from 'axios';
 import { sign } from "jsonwebtoken";
@@ -7,7 +8,8 @@ import { RegisterInput ,LoginInput } from "../types/InputTypes";
 import {LoginUserResponse} from '../types/ReturnTypes'
 import PubNub from '../services/PubNub'
 import {JWT_KEY} from '../constants'
- 
+import {generateV4ReadSignedUrl,generateV4UploadSignedUrl} from '../services/cloudStorage'
+import { MyContext } from "../types/MyContext";
 @Resolver()
 export class ModelResolver {
 
@@ -82,7 +84,47 @@ export class ModelResolver {
       return e
     }
   }
+
+  @Mutation(() => Boolean)
+  async generateSignedUrl(){
+    //9T1UZ_02.mp4
+    try{
+      let url = await generateV4ReadSignedUrl('9T1UZ_02.mp4').catch(console.error);
+      console.log(url)
+      return true
+    }catch(e) {
+      console.log(e)
+      return e
+    }
+  }
+
+  @Query(()=>String)
+  @UseMiddleware(isModelAuthed)
+  async getCloudPutUrl(
+    @Arg('filename')  filename : string,
+    @Arg('mimetype')  mimetype : string,
+    @Arg('bucket',{nullable:true})  bucket : string,
+    @Ctx() { model }: MyContext,
+  ) {
+    try {
+      let bucketName = 'global_fun'
+      if(bucket) {
+        bucketName = bucket
+      }
+      console.log(model)
+      let url = await generateV4UploadSignedUrl(filename,mimetype,bucketName).catch(console.error);
+      return url
+    }catch(e){
+      console.log(e)
+      return e
+    }
+  }
+
+
 }
+
+
+
 // setTimeout(()=>{
 // PubNub.subscribe()
 

@@ -84,7 +84,7 @@ const Main = async () => {
     cors<cors.CorsRequest>({ origin: '*' }),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token }),
+      context: async ({ req }) => ({ req: req }),
     }),
   );
   
