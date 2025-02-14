@@ -1,4 +1,4 @@
 node_modules
 src/constants.ts
 dist
-services/cloudStorage/keys.json
+src/services/cloudStorage/keys.json
