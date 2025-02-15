@@ -1,7 +1,7 @@
 import { MiddlewareFn } from "type-graphql";
 import { MyContext } from "../types/MyContext";
 
-import { Model } from "../entities/User";
+import { Model } from "../entities/Model";
 import {payload} from '../types/DataTypes'
 import { verify } from "jsonwebtoken";
 import { JWT_KEY } from "../constants";

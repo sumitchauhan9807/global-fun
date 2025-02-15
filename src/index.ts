@@ -13,7 +13,8 @@ import {ModelResolver} from './resolvers/Model'
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import PubNub from './services/PubNub'
-import {User,Model} from './entities/User'
+import {User} from './entities/User'
+import {Model , BasicInfo, Address, ModelDocuments} from './entities/Model'
 
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
 
@@ -39,7 +40,7 @@ const Main = async () => {
     database: DB_DATABASE,
     synchronize: true,
     logging: true,
-    entities: [User,Model]
+    entities: [User,Model,BasicInfo,Address,ModelDocuments]
   })
   
   interface MyContext {
