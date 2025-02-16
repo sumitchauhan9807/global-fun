@@ -142,8 +142,8 @@ export class Model extends BaseEntity {
   profileComplete: Boolean;
 
   @Field()
-  @Column({ default: false })
-  documentsVerified: Boolean;
+  @Column({ default: 'not_verified' })
+  documentsVerified: String;
 
   @Field(() => BasicInfo, { nullable: true })
   @OneToOne(() => BasicInfo, { onDelete: "CASCADE" })

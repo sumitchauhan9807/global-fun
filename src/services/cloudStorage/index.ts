@@ -12,6 +12,9 @@
 // Imports the Google Cloud client library
 
 let bucketName = 'p_global_fun'
+export const PRIVATE_BUCKET = 'p_global_fun'
+export const PUBLIC_BUCKET = 'global_fun'
+
 // let fileName = 'test.png'
 const {Storage} = require('@google-cloud/storage');
 
@@ -74,11 +77,16 @@ export const uploadFile = async (destFileName:string,filePath:string) => {
   }
 }
 
-export const deleteFile = async (filename:string) => {
+export const deleteFile = async (filename:string,bucketName:string) => {
   try {
-    return await storage.bucket(bucketName).file(filename).delete({
+    console.log(bucketName,"bucketName")
+    console.log(filename,"filename")
+
+    let result = await storage.bucket(bucketName).file(filename).delete({
       ifGenerationMatch: 0,
     });
+    console.log(result,"resultresultresultresult")
+    return result
   }catch(e) {
     return e
   }

@@ -6,6 +6,36 @@ import {payload} from '../types/DataTypes'
 import { verify } from "jsonwebtoken";
 import { JWT_KEY } from "../constants";
 import type { JwtPayload } from "jsonwebtoken"
+import { Admin } from "../entities/Admin";
+
+
+export const isAdminAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
+  let headers = req.context.req.headers
+  let authorization = headers['authorization'] 
+  if (!authorization) {
+    throw new Error("Auth header missing");
+  }
+  try {
+    const token = authorization.split(" ")[1];
+    const payload = verify(token, JWT_KEY!) as JwtPayload;
+    const user = await Admin.findOne({
+      where: {
+        id: payload.id,
+      },
+    });
+    if (!user) {
+      throw new Error("Invalid admin");
+    }
+
+    req.context.admin = user as any;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Not Authenticated");
+  }
+  return next();
+};
+
+
 
 export const isModelAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
   let headers = req.context.req.headers
@@ -24,7 +54,7 @@ export const isModelAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
       },
     });
     if (!user) {
-      throw new Error("Invalid user");
+      throw new Error("Invalid model");
     }
 
     req.context.model = user as any;

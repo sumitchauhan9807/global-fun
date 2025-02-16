@@ -2,6 +2,7 @@ import { User } from "../entities/User";
 import { Model } from "../entities/Model";
 
 import { ObjectType, Field } from "type-graphql";
+import { Admin } from "../entities/Admin";
 
 @ObjectType()
 export class LoginUserResponse {
@@ -20,4 +21,13 @@ export class LoginModelResponse {
 
   @Field(() => Model, { nullable: true })
   user: Model;
+}
+
+@ObjectType()
+export class LoginAdminResponse {
+  @Field(() => String, { nullable: true })
+  token: String;
+
+  @Field(() => Model, { nullable: true })
+  user: Admin;
 }

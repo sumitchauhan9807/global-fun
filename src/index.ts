@@ -14,9 +14,11 @@ import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import PubNub from './services/PubNub'
 import {User} from './entities/User'
+import {Admin} from './entities/Admin'
 import {Model , BasicInfo, Address, ModelDocuments} from './entities/Model'
 
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
+import { AdminResolver } from './resolvers/Admin';
 
 
 
@@ -40,14 +42,14 @@ const Main = async () => {
     database: DB_DATABASE,
     synchronize: true,
     logging: true,
-    entities: [User,Model,BasicInfo,Address,ModelDocuments]
+    entities: [User,Model,Admin,BasicInfo,Address,ModelDocuments]
   })
   
   interface MyContext {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver,ModelResolver]
+      resolvers:[UserResolver,ModelResolver,AdminResolver]
   });
   const app = express();
   app.use(
