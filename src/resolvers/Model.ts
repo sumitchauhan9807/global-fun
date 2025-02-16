@@ -16,7 +16,7 @@ export class ModelResolver {
 
 
   @Query(() => [Model])
-  async getAllModels() {
+  async getAllModelsPublic() {
     let models =  await Model.find()
     return models
   }
