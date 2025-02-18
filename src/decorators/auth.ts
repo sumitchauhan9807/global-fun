@@ -2,7 +2,7 @@ import { MiddlewareFn } from "type-graphql";
 import { MyContext } from "../types/MyContext";
 
 import { Model } from "../entities/Model";
-import {payload} from '../types/DataTypes'
+import {payload, USER_TYPES} from '../types/DataTypes'
 import { verify } from "jsonwebtoken";
 import { JWT_KEY } from "../constants";
 import type { JwtPayload } from "jsonwebtoken"
@@ -18,6 +18,11 @@ export const isAdminAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
   try {
     const token = authorization.split(" ")[1];
     const payload = verify(token, JWT_KEY!) as JwtPayload;
+
+    if(payload.userType != USER_TYPES.ADMIN) {
+      throw new Error("Invalid user type");
+    }
+
     const user = await Admin.findOne({
       where: {
         id: payload.id,
@@ -48,6 +53,9 @@ export const isModelAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
   try {
     const token = authorization.split(" ")[1];
     const payload = verify(token, JWT_KEY!) as JwtPayload;
+    if(payload.userType != USER_TYPES.MODEL) {
+      throw new Error("Invalid user type");
+    }
     const user = await Model.findOne({
       where: {
         id: payload.id,

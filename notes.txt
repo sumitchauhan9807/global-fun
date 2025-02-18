@@ -1,0 +1,8 @@
+MODEL STREAMING SESSION:-
+
+1. Model will start a live session via clicking "Start Live Session" ( model aslo sets the title for session)
+2. Model wil come online , set goal.
+3. In case of disconnection model can resume the same session
+4. Model can also pause the session
+5. If model stays disconnected for a few time session automatically terminates
+6. Model can manually terminate the session

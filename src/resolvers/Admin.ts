@@ -9,6 +9,7 @@ import { JWT_KEY } from "../constants";
 import { Model } from "../entities/Model";
 import { isAdminAuthed } from "../decorators/auth";
 import {moveFile,PRIVATE_BUCKET,PUBLIC_BUCKET} from '../services/cloudStorage/index'
+import { USER_TYPES } from "../types/DataTypes";
 
 @Resolver()
 export class AdminResolver {
@@ -160,7 +161,7 @@ export class AdminResolver {
 
       return {
         user: findUser,
-        token: sign({ id: findUser?.id }, JWT_KEY!),
+        token: sign({ id: findUser?.id ,userType:USER_TYPES.ADMIN }, JWT_KEY!),
       };
     } catch (e) {
       console.log(e);

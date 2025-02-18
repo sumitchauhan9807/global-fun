@@ -10,7 +10,7 @@ import PubNub from '../services/PubNub'
 import {JWT_KEY} from '../constants'
 import {generateV4ReadSignedUrl,generateV4UploadSignedUrl} from '../services/cloudStorage'
 import { MyContext } from "../types/MyContext";
-import {ModelDocumentsType} from '../types/DataTypes'
+import {ModelDocumentsType, USER_TYPES} from '../types/DataTypes'
 @Resolver()
 export class ModelResolver {
 
@@ -54,7 +54,7 @@ export class ModelResolver {
 
       return {
         user,
-        token: sign({ id: user?.id }, JWT_KEY!),
+        token: sign({ id: user?.id ,userType:USER_TYPES.MODEL }, JWT_KEY!),
       };
     }catch(e) {
       console.log(e)
@@ -78,7 +78,7 @@ export class ModelResolver {
       
       return {
         user:findUser,
-        token: sign({ id: findUser?.id }, JWT_KEY!),
+        token: sign({ id: findUser?.id ,userType:USER_TYPES.MODEL }, JWT_KEY!),
       };
     }catch(e) {
       console.log(e)
