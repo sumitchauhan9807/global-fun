@@ -68,7 +68,28 @@ export class LiveSessionResolver {
       return e
     }
   }
+
+  @Query(() => LiveSession,{nullable:true})
+  @UseMiddleware(isModelAuthed)
+  async getLiveSessions(
+    @Ctx() { model }: MyContext,
+  ) {
+    try{ 
+      let session = await LiveSession.find({
+        where:{
+          model:model,
+        }
+      })
+      return session
+    }
+    catch(e) {
+      console.log(e)
+      return e
+    }
+  }
 }
+}
+
 
 
 // setTimeout(()=>{
