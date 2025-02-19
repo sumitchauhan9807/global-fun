@@ -22,6 +22,7 @@ import {LiveSession,SessionGoal, SessionMessages} from './entities/LiveSession'
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
 import { AdminResolver } from './resolvers/Admin';
 import { LiveSessionResolver } from './resolvers/LiveSession';
+import { SystemResolver } from './resolvers/System';
 
 
 
@@ -52,7 +53,7 @@ const Main = async () => {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver,ModelResolver,AdminResolver,LiveSessionResolver]
+      resolvers:[UserResolver,ModelResolver,AdminResolver,LiveSessionResolver,SystemResolver]
   });
   const app = express();
   app.use(
