@@ -69,7 +69,7 @@ export class LiveSessionResolver {
     }
   }
 }
-}
+
 
 // setTimeout(()=>{
 // PubNub.subscribe()
