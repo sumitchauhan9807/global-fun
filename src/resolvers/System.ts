@@ -19,6 +19,7 @@ export class SystemResolver {
     @Arg("modelId") modelId : string,
     @Arg("authToken") authToken : string
   ) {
+    console.log(modelId,"modelId from ststsres")
     try{
       if(authToken != CROSS_SERVER_AUTH_TOKEN) throw Error('Auth Failed')
       let model = await Model.findOne({
