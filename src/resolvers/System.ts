@@ -28,7 +28,9 @@ export class SystemResolver {
       if(!model) throw Error('model not found')
       let liveSession = await LiveSession.findOne({
         where : { 
-          model:model,
+          model:{
+            id:model.id
+          },
           status:LIVE_SESSION_STATUS.IN_PROGRESS
         }
       })
