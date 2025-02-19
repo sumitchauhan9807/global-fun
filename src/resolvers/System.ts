@@ -16,14 +16,14 @@ export class SystemResolver {
   
   @Mutation(() => Boolean)
   async system_end_model_session(
-    @Arg("modelId") modelId : string,
+    @Arg("modelId") username : string,
     @Arg("authToken") authToken : string
   ) {
-    console.log(modelId,"modelId from ststsres")
+    // console.log(username,"modelId from ststsres")
     try{
       if(authToken != CROSS_SERVER_AUTH_TOKEN) throw Error('Auth Failed')
       let model = await Model.findOne({
-        where:{id:Number(modelId)},
+        where:{username:username},
       }) 
       if(!model) throw Error('model not found')
       let liveSession = await LiveSession.findOne({
