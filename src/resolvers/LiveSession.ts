@@ -49,7 +49,7 @@ export class LiveSessionResolver {
     }
   }
 
-  @Query(() => LiveSession)
+  @Query(() => LiveSession,{nullable:true})
   @UseMiddleware(isModelAuthed)
   async getModelActiveSession(
     @Ctx() { model }: MyContext,
