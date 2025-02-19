@@ -25,72 +25,94 @@ import {
   generateV4UploadSignedUrl,
 } from "../services/cloudStorage";
 import { MyContext } from "../types/MyContext";
-import { LIVE_SESSION_STATUS, ModelDocumentsType, USER_TYPES } from "../types/DataTypes";
+import {
+  LIVE_SESSION_STATUS,
+  ModelDocumentsType,
+  USER_TYPES,
+} from "../types/DataTypes";
 import { LiveSession } from "../entities/LiveSession";
+import { IntegerType } from "typeorm";
 @Resolver()
 export class LiveSessionResolver {
-
   @Mutation(() => LiveSession)
   @UseMiddleware(isModelAuthed)
   async createSession(
     @Ctx() { model }: MyContext,
-    @Arg('title')  title : string,
+    @Arg("title") title: string
   ) {
-    try{ 
+    try {
       let session = await LiveSession.create({
-        model:model,
-        title:title
-      })
-      return session
-    }
-    catch(e) {
-      console.log(e)
-      return e
+        model: model,
+        title: title,
+      }).save();
+      return session;
+    } catch (e) {
+      console.log(e);
+      return e;
     }
   }
 
-  @Query(() => LiveSession,{nullable:true})
+  @Query(() => LiveSession, { nullable: true })
   @UseMiddleware(isModelAuthed)
-  async getModelActiveSession(
-    @Ctx() { model }: MyContext,
-  ) {
-    try{ 
+  async getModelActiveSession(@Ctx() { model }: MyContext) {
+    try {
       let session = await LiveSession.findOne({
-        where:{
-          model:model,
-          status: LIVE_SESSION_STATUS.IN_PROGRESS
-        }
-      })
-      return session
-    }
-    catch(e) {
-      console.log(e)
-      return e
+        relations: ["model"],
+        where: {
+          model: {
+            id: model.id,
+          },
+          status: LIVE_SESSION_STATUS.IN_PROGRESS,
+        },
+      });
+      return session;
+    } catch (e) {
+      console.log(e);
+      return e;
     }
   }
 
-  @Query(() => LiveSession,{nullable:true})
+  @Mutation(() => Boolean)
   @UseMiddleware(isModelAuthed)
-  async getLiveSessions(
+  async endLiveSession(
     @Ctx() { model }: MyContext,
+    @Arg("id") id: number
   ) {
-    try{ 
-      let session = await LiveSession.find({
-        where:{
-          model:model,
-        }
+    try {
+      let session = await LiveSession.findOne({
+        relations: ["model"],
+        where: {
+          id:id
+        },
+      });
+      if(!session) throw Error('Session not found')
+      // if(session.model.id != model.id) throw Error ("Invalid Session id")
+      await LiveSession.update(id,{
+        status:LIVE_SESSION_STATUS.ENDED
       })
-      return session
+      return true;
+    } catch (e) {
+      console.log(e);
+      return e;
     }
-    catch(e) {
-      console.log(e)
-      return e
+  }
+
+  @Query(() => LiveSession, { nullable: true })
+  @UseMiddleware(isModelAuthed)
+  async getLiveSessions(@Ctx() { model }: MyContext) {
+    try {
+      let session = await LiveSession.find({
+        where: {
+          model: model,
+        },
+      });
+      return session;
+    } catch (e) {
+      console.log(e);
+      return e;
     }
   }
 }
-
-
-
 
 // setTimeout(()=>{
 // PubNub.subscribe()

@@ -162,7 +162,7 @@ export class Model extends BaseEntity {
   @JoinColumn()
   documents: ModelDocuments;
 
-  @OneToMany(() => LiveSession, (photo) => photo.model)
+  @OneToMany(() => LiveSession, (liveSession) => liveSession.model)
   live_sessions: LiveSession[]
 
   @Field(() => String)

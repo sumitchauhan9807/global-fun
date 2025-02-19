@@ -21,7 +21,16 @@ export class LiveSession extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Model, (model) => model.live_sessions)
+  // @Field(() => Affilate, { nullable: true, })
+  //   @ManyToOne(() => Affilate, { onDelete: "CASCADE" })
+  //   @JoinColumn({ name: 'affilate' })
+  //   affilate: Affilate;
+
+  @Field(() => Model, { nullable: true })
+  @ManyToOne(() => Model, {
+    eager: true,
+  })
+  @JoinColumn({name:"model"})
   model: Model;
 
   @Field()
@@ -31,7 +40,7 @@ export class LiveSession extends BaseEntity {
   @Field()
   @Column({
     type: "enum",
-    default:LIVE_SESSION_STATUS.IN_PROGRESS,
+    default: LIVE_SESSION_STATUS.IN_PROGRESS,
     enum: LIVE_SESSION_STATUS,
   })
   status: string;
