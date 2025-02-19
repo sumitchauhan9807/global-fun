@@ -16,9 +16,12 @@ import PubNub from './services/PubNub'
 import {User} from './entities/User'
 import {Admin} from './entities/Admin'
 import {Model , BasicInfo, Address, ModelDocuments} from './entities/Model'
+import {LiveSession,SessionGoal, SessionMessages} from './entities/LiveSession'
+
 
 import {DB_DATABASE,DB_PASSWORD,DB_USER} from './constants'
 import { AdminResolver } from './resolvers/Admin';
+import { LiveSessionResolver } from './resolvers/LiveSession';
 
 
 
@@ -42,14 +45,14 @@ const Main = async () => {
     database: DB_DATABASE,
     synchronize: true,
     logging: true,
-    entities: [User,Model,Admin,BasicInfo,Address,ModelDocuments]
+    entities: [User,Model,Admin,BasicInfo,Address,ModelDocuments,LiveSession,SessionGoal,SessionMessages]
   })
   
   interface MyContext {
     typeDefs?: String;
   }
   const schema = await buildSchema({
-      resolvers:[UserResolver,ModelResolver,AdminResolver]
+      resolvers:[UserResolver,ModelResolver,AdminResolver,LiveSessionResolver]
   });
   const app = express();
   app.use(

@@ -11,3 +11,8 @@ export enum USER_TYPES {
   MODEL = "MODEL",
   USER = "USER",
 };
+
+export enum LIVE_SESSION_STATUS {
+  IN_PROGRESS = 'IN_PROGRESS',
+  ENDED = "ENDED",
+};

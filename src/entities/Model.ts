@@ -7,8 +7,10 @@ import {
   CreateDateColumn,
   JoinColumn,
   OneToOne,
+  OneToMany,
 } from "typeorm";
 import { ObjectType, Field, ID, Root } from "type-graphql";
+import { LiveSession } from "./LiveSession";
 
 
 @ObjectType()
@@ -159,6 +161,9 @@ export class Model extends BaseEntity {
   @OneToOne(() => ModelDocuments, { onDelete: "CASCADE" })
   @JoinColumn()
   documents: ModelDocuments;
+
+  @OneToMany(() => LiveSession, (photo) => photo.model)
+  live_sessions: LiveSession[]
 
   @Field(() => String)
   @UpdateDateColumn()
