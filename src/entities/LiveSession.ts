@@ -29,6 +29,7 @@ export class LiveSession extends BaseEntity {
   @Field(() => Model, { nullable: true })
   @ManyToOne(() => Model, {
     eager: true,
+    onDelete:'CASCADE'
   })
   @JoinColumn({name:"model"})
   model: Model;
