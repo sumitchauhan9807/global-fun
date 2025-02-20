@@ -129,4 +129,17 @@ export class LiveSessionResolver {
       return e;
     }
   }
+
+  @Query(() => [LiveSession])
+  async getAllLiveSessions() {
+    try {
+      let sessions = await LiveSession.find({
+        relations:['model'],
+      });
+      return sessions;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
 }
