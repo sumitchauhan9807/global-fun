@@ -41,6 +41,7 @@ export class LiveSessionResolver {
     @Arg("title") title: string
   ) {
     try {
+      // here check if model already has a live session in progress, terminate that one then create one
       let session = await LiveSession.create({
         model: model,
         title: title,
@@ -86,7 +87,7 @@ export class LiveSessionResolver {
         },
       });
       if(!session) throw Error('Session not found')
-      // if(session.model.id != model.id) throw Error ("Invalid Session id")
+      if(session.model.id != model.id) throw Error ("Invalid Session id")
       await LiveSession.update(id,{
         status:LIVE_SESSION_STATUS.ENDED
       })
@@ -112,20 +113,19 @@ export class LiveSessionResolver {
       return e;
     }
   }
+
+  @Query(() => [LiveSession])
+  async getAllActiveLiveSessions() {
+    try {
+      let sessions = await LiveSession.find({
+        where: {
+          status:LIVE_SESSION_STATUS.IN_PROGRESS,
+        },
+      });
+      return sessions;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
 }
-
-// setTimeout(()=>{
-// PubNub.subscribe()
-
-//   console.log('pblishing')
-//   var publishPayload = {
-//     channel : "hello_world",
-//     message: {
-//         title: "greeting",
-//         description: "This is my first message!"
-//     }
-// }
-
-//   PubNub.addListener()
-//   PubNub.publish(publishPayload)
-// },3000)
