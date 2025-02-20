@@ -42,6 +42,9 @@ export class LiveSessionResolver {
   ) {
     try {
       // here check if model already has a live session in progress, terminate that one then create one
+      await LiveSession.update({ model: { id: model.id } }, {
+        status:LIVE_SESSION_STATUS.ENDED
+      });
       let session = await LiveSession.create({
         model: model,
         title: title,
@@ -75,22 +78,19 @@ export class LiveSessionResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(isModelAuthed)
-  async endLiveSession(
-    @Ctx() { model }: MyContext,
-    @Arg("id") id: number
-  ) {
+  async endLiveSession(@Ctx() { model }: MyContext, @Arg("id") id: number) {
     try {
       let session = await LiveSession.findOne({
         relations: ["model"],
         where: {
-          id:id
+          id: id,
         },
       });
-      if(!session) throw Error('Session not found')
-      if(session.model.id != model.id) throw Error ("Invalid Session id")
-      await LiveSession.update(id,{
-        status:LIVE_SESSION_STATUS.ENDED
-      })
+      if (!session) throw Error("Session not found");
+      if (session.model.id != model.id) throw Error("Invalid Session id");
+      await LiveSession.update(id, {
+        status: LIVE_SESSION_STATUS.ENDED,
+      });
       return true;
     } catch (e) {
       console.log(e);
@@ -118,9 +118,9 @@ export class LiveSessionResolver {
   async getAllActiveLiveSessions() {
     try {
       let sessions = await LiveSession.find({
-        relations:['model'],
-         where: {
-          status:LIVE_SESSION_STATUS.IN_PROGRESS,
+        relations: ["model"],
+        where: {
+          status: LIVE_SESSION_STATUS.IN_PROGRESS,
         },
       });
       return sessions;
@@ -134,7 +134,7 @@ export class LiveSessionResolver {
   async getAllLiveSessions() {
     try {
       let sessions = await LiveSession.find({
-        relations:['model'],
+        relations: ["model"],
       });
       return sessions;
     } catch (e) {
