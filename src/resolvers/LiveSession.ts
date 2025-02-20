@@ -118,7 +118,8 @@ export class LiveSessionResolver {
   async getAllActiveLiveSessions() {
     try {
       let sessions = await LiveSession.find({
-        where: {
+        relations:['model'],
+         where: {
           status:LIVE_SESSION_STATUS.IN_PROGRESS,
         },
       });
