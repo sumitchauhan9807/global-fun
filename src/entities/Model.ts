@@ -162,7 +162,7 @@ export class Model extends BaseEntity {
   @JoinColumn()
   documents: ModelDocuments;
 
-  @OneToMany(() => LiveSession, (liveSession) => liveSession.model)
+  @OneToMany(() => LiveSession, (liveSession) => liveSession.model,{onDelete:'CASCADE'})
   live_sessions: LiveSession[]
 
   @Field(() => String)

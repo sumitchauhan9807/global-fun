@@ -45,10 +45,10 @@ export class LiveSession extends BaseEntity {
   })
   status: string;
 
-  @OneToMany(() => SessionGoal, (goal) => goal.session)
+  @OneToMany(() => SessionGoal, (goal) => goal.session,{onDelete:'CASCADE'})
   goals: SessionGoal[];
 
-  @OneToMany(() => SessionMessages, (message) => message.session)
+  @OneToMany(() => SessionMessages, (message) => message.session,{onDelete:'CASCADE'})
   messages: SessionMessages[];
 
   @Field()
