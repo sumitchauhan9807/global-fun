@@ -7,6 +7,7 @@ import { RegisterInput ,LoginInput } from "../types/InputTypes";
 import {LoginUserResponse} from '../types/ReturnTypes'
 import PubNub from '../services/PubNub'
 import {JWT_KEY} from '../constants'
+import { USER_TYPES } from "../types/DataTypes";
  
 @Resolver()
 export class UserResolver {
@@ -64,7 +65,7 @@ export class UserResolver {
 
       return {
         user,
-        token: sign({ id: user?.id }, JWT_KEY!),
+        token: sign({ id: user?.id ,userType:USER_TYPES.USER }, JWT_KEY!),
       };
     }catch(e) {
       console.log(e)
@@ -88,7 +89,7 @@ export class UserResolver {
       
       return {
         user:findUser,
-        token: sign({ id: findUser?.id }, JWT_KEY!),
+        token: sign({ id: findUser?.id ,userType:USER_TYPES.USER }, JWT_KEY!),
       };
     }catch(e) {
       console.log(e)
