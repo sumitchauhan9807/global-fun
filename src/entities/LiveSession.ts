@@ -46,6 +46,7 @@ export class LiveSession extends BaseEntity {
   })
   status: string;
 
+  @Field()
   @OneToMany(() => SessionGoal, (goal) => goal.session,{onDelete:'CASCADE'})
   goals: SessionGoal[];
 
