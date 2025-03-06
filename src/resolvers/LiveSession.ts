@@ -84,8 +84,8 @@ export class LiveSessionResolver {
     }
   }
 
-
-  @Mutation(() => SessionGoal)
+  
+@Mutation(() => SessionGoal)
   @UseMiddleware(isModelAuthed)
   async addGoal(
     @Ctx() { model }: MyContext,
@@ -152,6 +152,28 @@ export class LiveSessionResolver {
         where: {
           model: {
             id: model.id,
+          },
+          status: LIVE_SESSION_STATUS.IN_PROGRESS,
+        },
+      });
+      return session;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
+
+  @Query(() => LiveSession, { nullable: true })
+  @UseMiddleware(isModelAuthed)
+  async getModelActiveSessionByUsername(
+    @Arg("username") username: string,
+  ) {
+    try {
+      let session = await LiveSession.findOne({
+        relations: ["goals"],
+        where: {
+          model: {
+            username:username
           },
           status: LIVE_SESSION_STATUS.IN_PROGRESS,
         },
