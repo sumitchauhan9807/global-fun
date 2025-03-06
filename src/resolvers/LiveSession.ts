@@ -30,8 +30,9 @@ import {
   ModelDocumentsType,
   USER_TYPES,
 } from "../types/DataTypes";
-import { LiveSession } from "../entities/LiveSession";
+import { LiveSession, SessionGoal } from "../entities/LiveSession";
 import { IntegerType } from "typeorm";
+import { Session } from "express-session";
 @Resolver()
 export class LiveSessionResolver {
   @Mutation(() => LiveSession)
@@ -41,7 +42,6 @@ export class LiveSessionResolver {
     @Arg("title") title: string
   ) {
     try {
-      // here check if model already has a live session in progress, terminate that one then create one
       await LiveSession.update({ model: { id: model.id } }, {
         status:LIVE_SESSION_STATUS.ENDED
       });
@@ -50,6 +50,93 @@ export class LiveSessionResolver {
         title: title,
       }).save();
       return session;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
+
+  @Query(() => SessionGoal,{nullable:true})
+  async getSessionGoal(
+    @Arg("sessionId") sessionId: number,
+  ) {
+    try {
+      let session = await LiveSession.findOne({
+        where : {id:sessionId}
+      })
+      if(!session) throw Error('Session not found')
+      console.log(session,"session")
+      let sessionGoal = await SessionGoal.findOne({
+        where :{
+          session:{
+            id:session.id
+          }
+        },
+        order:{
+          createdAt:'DESC'
+        }
+      })
+      console.log(sessionGoal,"sessionGoalsessionGoalsessionGoal")
+      return sessionGoal
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
+
+
+  @Mutation(() => SessionGoal)
+  @UseMiddleware(isModelAuthed)
+  async addGoal(
+    @Ctx() { model }: MyContext,
+    @Arg("title") title: string,
+    @Arg("tokenValue") tokenValue: number,
+    @Arg("sessionId") sessionId: number,
+  ) {
+    try {
+      let session = await LiveSession.findOne({
+        where : {id:sessionId}
+      })
+      if(!session) throw Error('Session not found')
+      if(session.model.id != model.id) throw Error('model is not auth')
+      let carryOnValue = 0
+      let oldGoal = await SessionGoal.findOne({
+        where :{
+          session:session
+        },
+        order:{
+          createdAt:'DESC'
+        }
+      })
+      if(oldGoal) {
+        if(!oldGoal.isAchived) {
+          carryOnValue = carryOnValue + oldGoal.tokensAchived
+        }
+      }
+
+      if(carryOnValue > tokenValue)  {
+        throw Error(`token value should be grater than ${carryOnValue}`)
+      }
+
+      let goal = await SessionGoal.create({
+        title:title,
+        session:session,
+        tokenValue:tokenValue,
+        tokensAchived:carryOnValue
+      }).save()
+
+      PubNub.publish({
+        channel : model.username,
+			  message:{ 
+          type:"GOAL_ADDED",
+          goal: {
+            title:goal.title,
+            tokenValue:goal.tokenValue,
+            tokensAchived:goal.tokensAchived
+          }
+        }
+      })
+      return goal
     } catch (e) {
       console.log(e);
       return e;
