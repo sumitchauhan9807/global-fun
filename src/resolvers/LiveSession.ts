@@ -164,7 +164,6 @@ export class LiveSessionResolver {
   }
 
   @Query(() => LiveSession, { nullable: true })
-  @UseMiddleware(isModelAuthed)
   async getModelActiveSessionByUsername(
     @Arg("username") username: string,
   ) {
