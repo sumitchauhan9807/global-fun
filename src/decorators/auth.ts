@@ -7,7 +7,7 @@ import { verify } from "jsonwebtoken";
 import { JWT_KEY } from "../constants";
 import type { JwtPayload } from "jsonwebtoken"
 import { Admin } from "../entities/Admin";
-import { User } from "src/entities/User";
+import { User } from "../entities/User";
 
 
 export const isAdminAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
