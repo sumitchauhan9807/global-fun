@@ -110,11 +110,12 @@ export class LiveSessionResolver {
         }
       })
       if(oldGoal) {
+        console.log("OLD GOAL FOUNDDD")
         if(!oldGoal.isAchived) {
           carryOnValue = carryOnValue + oldGoal.tokensAchived
         }
       }
-
+      console.log(carryOnValue,"carryOnValuecarryOnValuecarryOnValuecarryOnValue")
       if(carryOnValue > tokenValue)  {
         throw Error(`token value should be grater than ${carryOnValue}`)
       }
