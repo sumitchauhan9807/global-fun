@@ -33,6 +33,7 @@ import {
 import { LiveSession, SessionGoal } from "../entities/LiveSession";
 import { IntegerType, LessThanOrEqual } from "typeorm";
 import { Session } from "express-session";
+import { User } from "../entities/User";
 @Resolver()
 export class LiveSessionResolver {
   @Mutation(() => LiveSession)
@@ -222,15 +223,16 @@ export class LiveSessionResolver {
     }
   }
 
-  @Mutation(() => SessionGoal, { nullable: true })
+  @Mutation(() => Boolean, { nullable: true })
   @UseMiddleware(isUserAuthed)
   async spentTokens(
     @Ctx() { user }: MyContext,
     @Arg("sessionId") sessionId: number,
-
+    @Arg("tokens") tokens: number,
   ) {
     try {
       let session = await LiveSession.findOne({
+        relations:['model'],
         where :{id:sessionId}
       })
       if(!session) throw Error("session not found")
@@ -242,7 +244,35 @@ export class LiveSessionResolver {
           createdAt:'DESC'
         }
       })
-      return sessionGoal;
+      if(!sessionGoal) throw Error("sesion goal not found")
+      
+      let userTokens = user.tokens
+      if(tokens > userTokens) throw Error("You dont have enough tokens")
+      await User.update(user.id,{
+        tokens:userTokens - tokens
+      })
+      let finalTokens = sessionGoal.tokensAchived + tokens
+      await SessionGoal.update(sessionGoal.id,{
+        tokensAchived : finalTokens
+      })
+      PubNub.publish({
+        channel : session.model.username,
+			  message:{ 
+          type:"TOKENS_ADDED",
+          data: {
+            tokens:finalTokens
+          }
+        }
+      })
+      if(finalTokens == sessionGoal.tokenValue) {
+        PubNub.publish({
+          channel : session.model.username,
+          message:{ 
+            type:"GOAL_ACHIVED",
+          }
+        })
+      }
+      return true;
     } catch (e) {
       console.log(e);
       return e;
