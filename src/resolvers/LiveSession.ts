@@ -6,7 +6,7 @@ import {
   UseMiddleware,
   Ctx,
 } from "type-graphql";
-import { isModelAuthed } from "../decorators/auth";
+import { isModelAuthed, isUserAuthed } from "../decorators/auth";
 import bcrypt from "bcryptjs";
 import axios from "axios";
 import { sign } from "jsonwebtoken";
@@ -31,7 +31,7 @@ import {
   USER_TYPES,
 } from "../types/DataTypes";
 import { LiveSession, SessionGoal } from "../entities/LiveSession";
-import { IntegerType } from "typeorm";
+import { IntegerType, LessThanOrEqual } from "typeorm";
 import { Session } from "express-session";
 @Resolver()
 export class LiveSessionResolver {
@@ -216,6 +216,33 @@ export class LiveSessionResolver {
         },
       });
       return session;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
+
+  @Mutation(() => SessionGoal, { nullable: true })
+  @UseMiddleware(isUserAuthed)
+  async spentTokens(
+    @Ctx() { user }: MyContext,
+    @Arg("sessionId") sessionId: number,
+
+  ) {
+    try {
+      let session = await LiveSession.findOne({
+        where :{id:sessionId}
+      })
+      if(!session) throw Error("session not found")
+      let sessionGoal = await SessionGoal.findOne({
+        where :{ session :{
+          id:session.id
+        }},
+        order:{
+          createdAt:'DESC'
+        }
+      })
+      return sessionGoal;
     } catch (e) {
       console.log(e);
       return e;

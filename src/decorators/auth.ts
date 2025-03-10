@@ -7,6 +7,7 @@ import { verify } from "jsonwebtoken";
 import { JWT_KEY } from "../constants";
 import type { JwtPayload } from "jsonwebtoken"
 import { Admin } from "../entities/Admin";
+import { User } from "src/entities/User";
 
 
 export const isAdminAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
@@ -66,6 +67,37 @@ export const isModelAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
     }
 
     req.context.model = user as any;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Not Authenticated");
+  }
+  return next();
+};
+
+export const isUserAuthed: MiddlewareFn<MyContext> = async (req:any, next) => {
+  let headers = req.context.req.headers
+  let authorization = headers['authorization'] 
+  console.log(authorization,"asdasdasddsaasdasdasd")
+  // const authorization = context.req.headers["authorization"];
+  if (!authorization) {
+    throw new Error("Auth header missing");
+  }
+  try {
+    const token = authorization.split(" ")[1];
+    const payload = verify(token, JWT_KEY!) as JwtPayload;
+    if(payload.userType != USER_TYPES.USER) {
+      throw new Error("Invalid user type");
+    }
+    const user = await User.findOne({
+      where: {
+        id: payload.id,
+      },
+    });
+    if (!user) {
+      throw new Error("Invalid user");
+    }
+
+    req.context.user = user as any;
   } catch (err) {
     console.log(err);
     throw new Error("Not Authenticated");
