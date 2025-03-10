@@ -245,7 +245,7 @@ export class LiveSessionResolver {
         }
       })
       if(!sessionGoal) throw Error("sesion goal not found")
-      
+      if(sessionGoal.isAchived) throw Error("Goal is already achived")
       let userTokens = user.tokens
       if(tokens > userTokens) throw Error("You dont have enough tokens")
       await User.update(user.id,{
@@ -264,12 +264,15 @@ export class LiveSessionResolver {
           }
         }
       })
-      if(finalTokens == sessionGoal.tokenValue) {
+      if(finalTokens >= sessionGoal.tokenValue) {
         PubNub.publish({
           channel : session.model.username,
           message:{ 
             type:"GOAL_ACHIVED",
           }
+        })
+        await SessionGoal.update(sessionGoal.id,{
+          isAchived:true
         })
       }
       return true;
