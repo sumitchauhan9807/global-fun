@@ -103,7 +103,9 @@ export class LiveSessionResolver {
       let carryOnValue = 0
       let oldGoal = await SessionGoal.findOne({
         where :{
-          session:session
+          session:{
+            id:session.id
+          }
         },
         order:{
           createdAt:'DESC'
