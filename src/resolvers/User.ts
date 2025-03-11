@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg, Ctx } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Ctx, UseMiddleware } from "type-graphql";
 import bcrypt from "bcryptjs";
 import axios from "axios";
 import { sign } from "jsonwebtoken";
@@ -9,6 +9,7 @@ import PubNub from "../services/PubNub";
 import { JWT_KEY } from "../constants";
 import { USER_TYPES } from "../types/DataTypes";
 import { MyContext } from "../types/MyContext";
+import { isUserAuthed } from "../decorators/auth";
 
 @Resolver()
 export class UserResolver {
@@ -94,6 +95,7 @@ export class UserResolver {
   }
 
   @Query(() => Number)
+  @UseMiddleware(isUserAuthed)
   async getUserTokens(@Ctx() { user }: MyContext) {
     try {
       return user.tokens;
